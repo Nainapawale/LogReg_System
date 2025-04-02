@@ -1,48 +1,62 @@
-import React, { useState, useContext } from "react";
-import { loginUser } from "../api/auth.js";
-import { AuthContext } from "../context/AuthContext";
+import { useState, useContext } from "react";
+import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "./Design.css"; // Import CSS
+import { AuthContext } from "../context/AuthContext";
+import "./login.css"; // Import CSS for styling
 
-const Login = () => {
+function Login() {
   const { setUser } = useContext(AuthContext);
-  const [form, setForm] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({ email: "", password: "" });
+  const [error, setError] = useState(""); // Error message state
+  const [loading, setLoading] = useState(false); // Loading state
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
+    setError(""); // Reset error
+    setLoading(true); // Start loading
 
     try {
-      const response = await loginUser(form); // Call API
-      console.log("Login Response:", response.data);
-      const { user, token } = response.data;
+      const { data } = await axios.post(
+        "http://localhost:5000/login",
+        formData
+      );
 
-      localStorage.setItem("token", token); // ✅ Save token in localStorage
-      setUser(user); // ✅ Update context
+      console.log("Login Response:", data); // ✅ Debugging response
 
-      alert("Login successful!");
+      // Store token & user details
+      localStorage.setItem("token", data.token);
+      if (data.user) {
+        localStorage.setItem("user", JSON.stringify(data.user));
+        setUser(data.user);
+      }
+
       navigate("/dashboard");
     } catch (error) {
-      setError("Invalid email or password.");
+      console.error(
+        "❌ Login Error:",
+        error.response?.data?.message || error.message
+      );
+      setError(error.response?.data?.message || "Login failed. Try again.");
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
   return (
     <div className="login-container">
       <div className="login-card">
-        <h2>Welcome Back</h2>
-        {error && <p className="error">{error}</p>}
+        <h2>Login</h2>
+        {error && <p className="error-msg">{error}</p>}
         <form onSubmit={handleSubmit}>
           <input
             type="email"
             name="email"
-            placeholder="Email Address"
+            placeholder="Email"
+            value={formData.email}
             onChange={handleChange}
             required
           />
@@ -50,18 +64,21 @@ const Login = () => {
             type="password"
             name="password"
             placeholder="Password"
+            value={formData.password}
             onChange={handleChange}
             required
           />
-          <button type="submit">Login</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
         </form>
         <p className="register-link">
           New here?{" "}
-          <span onClick={() => navigate("/register")}>Create an account</span>
+          <span onClick={() => navigate("/register")}>Create Account</span>
         </p>
       </div>
     </div>
   );
-};
+}
 
 export default Login;

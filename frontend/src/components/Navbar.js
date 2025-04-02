@@ -1,7 +1,7 @@
 import React, { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
-import "./navbar.css"; // Import CSS
+import "./navbar.css";
 
 const Navbar = () => {
   const { user, logout } = useContext(AuthContext);
@@ -17,14 +17,18 @@ const Navbar = () => {
       <div className="nav-brand">MyApp</div>
       <ul className="nav-links">
         <li>
-          <Link to="/">Home</Link>
+          <Link to="/dashboard">Home </Link>
+          <Link to="/register">Register </Link>
+          <Link to="/login">Login </Link>
         </li>
+
         {user && (
           <li>
             <Link to="/dashboard">Dashboard</Link>
           </li>
         )}
       </ul>
+
       <div className="nav-auth">
         {user ? (
           <button onClick={handleLogout} className="logout-btn">
@@ -35,6 +39,7 @@ const Navbar = () => {
             Login
           </Link>
         )}
+        {/* {user ? <p>Welcome, {user.name}</p> : <p>Please login</p>} */}
       </div>
     </nav>
   );

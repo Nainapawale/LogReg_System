@@ -1,15 +1,23 @@
-import React, { useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-// import useAuth from "../hooks/useAuth";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import "./Design.css"; // Import CSS
+import "./dashboard.css"; // Import CSS for styling
 
-const Dashboard = () => {
-  const { user, logout } = useContext(AuthContext);
+function Dashboard() {
+  const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (!storedUser) {
+      navigate("/login");
+    } else {
+      setUser(JSON.parse(storedUser));
+    }
+  }, [navigate]);
+
   const handleLogout = () => {
-    logout();
+    localStorage.removeItem("user"); // Remove user from storage
+    localStorage.removeItem("token"); // Remove token for security
     navigate("/login");
   };
 
@@ -18,10 +26,12 @@ const Dashboard = () => {
       <div className="dashboard-card">
         <h2>Welcome, {user ? user.name : "User"}!</h2>
         <p>Email: {user ? user.email : "Not Available"}</p>
-        <button onClick={handleLogout}>Logout</button>
+        <button className="logout-btn" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
     </div>
   );
-};
+}
 
 export default Dashboard;
