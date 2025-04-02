@@ -1,5 +1,5 @@
 import { createContext, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode"; // Correct import
+import { jwtDecode } from "jwt-decode";
 
 export const AuthContext = createContext();
 
@@ -8,51 +8,34 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (token) {
       try {
         const decodedUser = jwtDecode(token);
-
-        // ✅ Check if token is expired
-        const currentTime = Date.now() / 1000; // Convert to seconds
-        if (decodedUser.exp && decodedUser.exp < currentTime) {
-          console.warn("Token expired, logging out...");
-          logout();
-          return;
-        }
-
+        console.log("✅ Decoded User:", decodedUser); // ✅ Debug token decoding
         setUser(decodedUser);
       } catch (error) {
-        console.error("Invalid token:", error);
-        logout();
+        console.error("❌ Invalid token:", error);
+        localStorage.removeItem("token");
       }
     }
   }, []);
 
-  const login = (token, userData) => {
+  const login = (token) => {
     try {
       const decodedUser = jwtDecode(token);
-
-      // ✅ Check if token is expired
-      const currentTime = Date.now() / 1000;
-      if (decodedUser.exp && decodedUser.exp < currentTime) {
-        console.warn("Token expired, login rejected.");
-        return;
-      }
-
-      setUser(userData || decodedUser);
+      console.log("✅ Login Successful. Decoded User:", decodedUser);
+      setUser(decodedUser);
       localStorage.setItem("token", token);
-      if (userData) {
-        localStorage.setItem("user", JSON.stringify(userData));
-      }
     } catch (error) {
-      console.error("Error decoding token:", error);
+      console.error("❌ Error decoding token:", error);
     }
   };
 
   const logout = () => {
+    console.log("🔴 Logging out...");
     setUser(null);
     localStorage.removeItem("token");
-    localStorage.removeItem("user");
   };
 
   return (

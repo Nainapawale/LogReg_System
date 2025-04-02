@@ -29,7 +29,7 @@ function App() {
 
 // Registration Page with API call
 function RegisterPage() {
-  const [user, setUser] = useState({ username: "", email: "", password: "" });
+  const [user, setUser] = useState({ name: "", email: "", password: "" });
   const navigate = useNavigate();
 
   const handleRegister = async (e) => {

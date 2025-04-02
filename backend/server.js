@@ -30,27 +30,44 @@ db.connect((err) => {
 
 // User Registration
 app.post("/register", async (req, res) => {
-  const { username, email, password } = req.body;
-
-  // Validate input
-  if (!username || !email || !password) {
-    return res.status(400).json({ message: "All fields are required" });
-  }
-
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const sql =
-      "INSERT INTO users (username, email, password) VALUES (?, ?, ?)";
+    console.log("📥 Received Registration Data:", req.body); // ✅ Debugging
 
-    db.query(sql, [username, email, hashedPassword], (err, result) => {
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Check if email already exists
+    const emailCheckQuery = "SELECT * FROM users WHERE email = ?";
+    db.query(emailCheckQuery, [email], async (err, result) => {
       if (err) {
-        console.error("Registration Error:", err.message);
-        return res.status(500).json({ message: "Registration failed" });
+        console.error("❌ Email Check Error:", err);
+        return res.status(500).json({ message: "Database error", error: err });
       }
-      res.json({ message: " User registered successfully" });
+      if (result.length > 0) {
+        return res.status(400).json({ message: "Email already registered" });
+      }
+
+      // Hash password before storing
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Insert into database
+      const sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+      db.query(sql, [name, email, hashedPassword], (err, result) => {
+        if (err) {
+          console.error("❌ MySQL Insert Error:", err);
+          return res
+            .status(500)
+            .json({ message: "Database error", error: err });
+        }
+        res.status(201).json({ message: "User registered successfully!" });
+      });
     });
   } catch (error) {
-    res.status(500).json({ message: "Error hashing password" });
+    console.error("❌ Registration Error:", error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

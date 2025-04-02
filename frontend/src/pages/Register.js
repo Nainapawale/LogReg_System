@@ -5,7 +5,7 @@ import "./register.css"; // Import CSS for styling
 
 function Register() {
   const [formData, setFormData] = useState({
-    username: "",
+    name: "",
     email: "",
     password: "",
   });
@@ -24,6 +24,8 @@ function Register() {
     e.preventDefault();
     setError(""); // Reset error state
     setLoading(true); // Start loading
+
+    console.log("📤 Sending data:", formData);
 
     try {
       await axios.post("http://localhost:5000/register", formData);
@@ -50,7 +52,7 @@ function Register() {
         <form onSubmit={handleSubmit}>
           <input
             type="text"
-            name="username"
+            name="name"
             placeholder="Full Name"
             value={formData.name}
             onChange={handleChange}
