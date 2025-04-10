@@ -120,9 +120,20 @@ app.post("/login", (req, res) => {
 // Fetch All Users
 app.get("/users", (req, res) => {
   const sql = "SELECT id, name, email FROM users";
+
   db.query(sql, (err, results) => {
-    if (err) return res.status(500).json({ message: "Failed to fetch users" });
-    res.json(results);
+    if (err) {
+      console.error("Error fetching users:", err); // Logs the error for debugging
+      return res
+        .status(500)
+        .json({ message: "Failed to fetch users", error: err.message });
+    }
+
+    if (results.length === 0) {
+      return res.status(404).json({ message: "No users found" }); // Handles empty results
+    }
+
+    res.status(200).json(results);
   });
 });
 

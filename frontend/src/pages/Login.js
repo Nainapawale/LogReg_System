@@ -38,7 +38,7 @@ function Login() {
       navigate("/dashboard");
     } catch (error) {
       console.error(
-        "❌ Login Error:",
+        " Login Error:",
         error.response?.data?.message || error.message
       );
       setError(error.response?.data?.message || "Login failed. Try again.");
